@@ -5,3 +5,4 @@ services:
    volumes:
      - ./data:/usr/src/app/data
      - ./job:/usr/src/app/job
+     - ./output:/usr/src/app/output
