@@ -1,0 +1,7 @@
+services:
+  data_to_cloud:
+   build: .
+   command: [".venv/bin/python", "-m", "job.data_to_cloud"]
+   volumes:
+     - ./data:/usr/src/app/data
+     - ./job:/usr/src/app/job
