@@ -33,6 +33,20 @@ LAYERS = [
         multi_file=False,
     ),
     dict(
+        name="vegetation_landuse",
+        suffix="Vegetasi (Penggunaan Lahan Eksisting) Indonesia - Lapak GIS",
+        type="shapefile",
+        hierarchy=True,
+        multi_file=True,
+    ),
+    dict(
+        name="mangrove",
+        suffix="[LapakGIS.com] Kawasan Hutan Mangrove",
+        type="shapefile",
+        hierarchy=False,
+        multi_file=True,
+    ),
+    dict(
         name="built_up_indonesia",
         suffix="[LapakGIS.com] Lingkungan Terbangun Indonesia",
         type="shapefile",
