@@ -77,24 +77,8 @@ LAYERS = [
 ]
 
 
-def process_layer(layer_dict: dict):
-    layer_name = layer_dict["name"]
-    suffix = layer_dict["suffix"]
-    type = layer_dict["type"]
-    hierarchy = layer_dict["hierarchy"]
-    multi_file = layer_dict["multi_file"]
-
-    if type == "image":
-        file_format = ".tif"
-    elif type == "shapefile":
-        file_format = ".fgb"
-
-    if (not hierarchy) and (not multi_file):
-        input_path = f"{PREFIX}/{suffix}"
-        output_path = f"{OUTPUT}/{layer_name}{file_format}"
-
-        if type == "image":
-            cmd = f"""gdal raster reproject \
+def raster_cmd(input_path, output_path):
+    cmd = f"""gdal raster reproject \
                     --overwrite \
                     -d EPSG:4326 \
                     -f COG \
@@ -107,8 +91,11 @@ def process_layer(layer_dict: dict):
                     "{input_path}" \
                     "{output_path}"
             """
-        elif type == "shapefile":
-            cmd = f"""gdal vector pipeline \
+    check_call(cmd, shell=True)
+
+
+def vector_cmd(input_path, output_path):
+    cmd = f"""gdal vector pipeline \
                     ! read "{input_path}" \
                     ! make-valid \
                     ! explode-collections \
@@ -116,8 +103,27 @@ def process_layer(layer_dict: dict):
                     ! reproject -d EPSG:4326 \
                     ! write --overwrite -f FlatGeobuf "{output_path}" \
             """
+    check_call(cmd, shell=True)
 
-        check_call(cmd, shell=True)
+
+def process_layer(layer_dict: dict):
+    layer_name = layer_dict["name"]
+    suffix = layer_dict["suffix"]
+    type = layer_dict["type"]
+    hierarchy = layer_dict["hierarchy"]
+    multi_file = layer_dict["multi_file"]
+
+    if type == "image":
+        file_format = ".tif"
+        function_cmd = raster_cmd
+    elif type == "shapefile":
+        file_format = ".fgb"
+        function_cmd = vector_cmd
+
+    if (not hierarchy) and (not multi_file):
+        input_path = f"{PREFIX}/{suffix}"
+        output_path = f"{OUTPUT}/{layer_name}{file_format}"
+        function_cmd(input_path, output_path)
 
 
 def main():
