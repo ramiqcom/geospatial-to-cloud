@@ -3,3 +3,5 @@ __pycache__
 .venv
 private_key.json
 
+*.tif
+*.fgb
