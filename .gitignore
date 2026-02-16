@@ -2,6 +2,6 @@ data
 __pycache__
 .venv
 private_key.json
-
+output
 *.tif
 *.fgb
