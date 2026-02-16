@@ -1,5 +1,6 @@
 # layer location prefix
 from concurrent.futures import ThreadPoolExecutor
+from os import listdir
 from subprocess import check_call
 
 from job.utils import MAX_WORKERS, logger
@@ -45,6 +46,7 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        sub_ids=["25k", "50k", "250k"],
     ),
     dict(
         name="built_up_indonesia",
@@ -52,6 +54,7 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        sub_ids=["25k", "50k", "250k"],
     ),
     dict(
         name="public_facilities_indonesia",
@@ -66,6 +69,7 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        sub_ids=["25k", "50k", "250k", "utama_250k"],
     ),
     dict(
         name="geological_indonesia",
@@ -73,11 +77,14 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        id_index=0,
+        sub_ids=["regional", "sesar", "neogen", "orogen"],
     ),
 ]
 
 
 def raster_cmd(input_path, output_path):
+    logger.info(f"Running {output_path}")
     cmd = f"""gdal raster reproject \
                     --overwrite \
                     -d EPSG:4326 \
@@ -95,6 +102,7 @@ def raster_cmd(input_path, output_path):
 
 
 def vector_cmd(input_path, output_path):
+    logger.info(f"Running {output_path}")
     cmd = f"""gdal vector pipeline \
                     ! read "{input_path}" \
                     ! make-valid \
@@ -112,6 +120,7 @@ def process_layer(layer_dict: dict):
     type = layer_dict["type"]
     hierarchy = layer_dict["hierarchy"]
     multi_file = layer_dict["multi_file"]
+    input_path = f"{PREFIX}/{suffix}"
 
     if type == "image":
         file_format = ".tif"
@@ -121,9 +130,28 @@ def process_layer(layer_dict: dict):
         function_cmd = vector_cmd
 
     if (not hierarchy) and (not multi_file):
-        input_path = f"{PREFIX}/{suffix}"
         output_path = f"{OUTPUT}/{layer_name}{file_format}"
-        function_cmd(input_path, output_path)
+        # function_cmd(input_path, output_path)
+    elif (not hierarchy) and (multi_file):
+        list_file = listdir(input_path)
+        list_file = [file for file in list_file if file.endswith(".shp")]
+
+        with ThreadPoolExecutor(MAX_WORKERS) as executor:
+            jobs = []
+            for file in list_file:
+                file_id = [
+                    id
+                    for id in layer_dict["sub_ids"]
+                    if id in file.replace(" ", "_").lower()
+                ]
+                logger.info(file_id)
+                output_path = f"{OUTPUT}/{layer_name}_{file_id}{file_format}"
+                # jobs.append(executor.submit(function_cmd, input_path, output_path))
+            for job in jobs:
+                try:
+                    job.result()
+                except Exception as e:
+                    logger.info(f"Error: {e}")
 
 
 def main():
