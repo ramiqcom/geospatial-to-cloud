@@ -84,6 +84,7 @@ def process_layer(layer_dict: dict):
                     --overwrite \
                     -d EPSG:4326 \
                     -f COG \
+                    --co="BIGTIFF=YES" \
                     --co="COMPRESS=ZSTD" \
                     --co="STATISTICS=YES" \
                     --co="OVERVIEWS=IGNORE_EXISTING" \
