@@ -46,6 +46,7 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        source_ids=["Hutan_Mangrove_25K", "Hutan_Mangrove_50K", "Hutan_Mangrove_250K"],
         sub_ids=["25k", "50k", "250k"],
     ),
     dict(
@@ -54,6 +55,11 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
+        source_ids=[
+            "Permukiman 25K (164)",
+            "Permukiman 50K (166)",
+            "Permukiman Penduduk 250K (167)",
+        ],
         sub_ids=["25k", "50k", "250k"],
     ),
     dict(
@@ -69,7 +75,13 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
-        sub_ids=["25k", "50k", "250k", "utama_250k"],
+        source_ids=[
+            "Permukiman 25K (164)",
+            "Permukiman 50K (164)",
+            "Ruas Jalan 250k (83)",
+            "Ruas Jalan Utama 250k (82)",
+        ],
+        sub_ids=["25k", "50k", "250k", "main_250k"],
     ),
     dict(
         name="geological_indonesia",
