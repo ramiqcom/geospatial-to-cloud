@@ -1,6 +1,6 @@
 # layer location prefix
 from concurrent.futures import ThreadPoolExecutor
-from os import listdir
+from math import inf
 from subprocess import check_call
 
 from job.utils import MAX_WORKERS, logger
@@ -89,7 +89,12 @@ LAYERS = [
         type="shapefile",
         hierarchy=False,
         multi_file=True,
-        id_index=0,
+        source_ids=[
+            "[LapakGIS.com] GEOLOGI_REGIONAL_250K",
+            "[LapakGIS.com] JENIS SESAR",
+            "[LapakGIS.com] TEKNIKA NEOGEN",
+            "[LapakGIS.com] TEKNIKA OROGEN",
+        ],
         sub_ids=["regional", "sesar", "neogen", "orogen"],
     ),
 ]
@@ -145,19 +150,15 @@ def process_layer(layer_dict: dict):
         output_path = f"{OUTPUT}/{layer_name}{file_format}"
         # function_cmd(input_path, output_path)
     elif (not hierarchy) and (multi_file):
-        list_file = listdir(input_path)
-        list_file = [file for file in list_file if file.endswith(".shp")]
-
         with ThreadPoolExecutor(MAX_WORKERS) as executor:
             jobs = []
-            for file in list_file:
-                file_id = [
-                    id
-                    for id in layer_dict["sub_ids"]
-                    if id in file.replace(" ", "_").lower()
-                ]
-                logger.info(file_id)
-                output_path = f"{OUTPUT}/{layer_name}_{file_id}{file_format}"
+            for index in range(len(layer_dict["source_ids"])):
+                path = layer_dict["source_ids"][index]
+                path = f"{input_path}/{path}.shp"
+                logger.info(path)
+                output_path = (
+                    f"{OUTPUT}/{layer_name}_{layer_dict['sub_ids'][index]}{file_format}"
+                )
                 # jobs.append(executor.submit(function_cmd, input_path, output_path))
             for job in jobs:
                 try:
